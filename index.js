@@ -27,6 +27,7 @@ var objToFormData = ( obj ) => {
 };
 
 fetch$('imageCaptcha.htm')
+	//grab and save captcha
 	.flatMap(res => {
 		const dest = fs.createWriteStream('./captcha.jpg');
 		res.body.pipe(dest);
@@ -36,8 +37,11 @@ fetch$('imageCaptcha.htm')
 				text
 			]);
 	})
+	//display captcha
 	.do(() => exec('open captcha.jpg'))
+	//prompt to solve captcha
 	.flatMap( ([session]) => prompt$(captchaPrompt).map(input => [session,input.val] ))
+	//submit solved captcha with session info
 	.flatMap( ([session,captchaResponse]) => {
 		let userId = uuid();
 		let config = {
@@ -51,8 +55,10 @@ fetch$('imageCaptcha.htm')
 		return fetch$('registerUser.htm', config)
 			.map(res => [userId,res]);
 	})
-	//.do(res => console.log(res.text()))
+	//get response
 	.flatMap(([userId,res]) => Rx.Observable.fromPromise(res.text())
 		.map(text => [userId,text]))
+	//clean response
 	.map(([userId,txt]) => txt || `NEW USER: ${userId}`)
+	//display response
 	.subscribe(console.log);
