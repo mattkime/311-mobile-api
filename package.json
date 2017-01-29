@@ -1,0 +1,25 @@
+{
+  "name": "311-mobile-api",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel index.js --out-file index-compiled.js --source-maps",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "-start": "NODE_ENV=\"dev\" babel-node index.js",
+    "start": "npm run build && node index-compiled.js",
+    "debug": "npm run build && node-debug index-compiled.js"
+  },
+  "repository": "git@github.com:mattkime/311-mobile-api.git",
+  "author": "Matt Kime <matt@mattki.me>",
+  "license": "MIT",
+  "dependencies": {
+    "babel-cli": "^6.22.2",
+    "cookie": "^0.3.1",
+    "form-data": "^2.1.2",
+    "inquirer": "^3.0.1",
+    "node-fetch": "^1.6.3",
+    "rxjs": "^5.0.3",
+    "rxjs-fetch": "^2.1.6",
+    "uuid": "^3.0.1"
+  }
+}
