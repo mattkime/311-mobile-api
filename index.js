@@ -9,7 +9,7 @@ let uuid = require('uuid/v4');
 
 let prompt$ = prompts => Rx.Observable.fromPromise(inquirer.prompt(prompts));
 let fetch$ = (url, config) => {
-	return Rx.Observable.fromPromise(fetch(`https://www1.nyc.gov/NYC311-Mobile-Services-A/${url}`,config));
+	return Rx.Observable.fromPromise(fetch(`http://www1.nyc.gov/NYC311-Mobile-Services-A/${url}`,config));
 }
 
 let captchaPrompt = [{name:'val',message:'whats the text in the image?'}];
