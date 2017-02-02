@@ -91,6 +91,39 @@ let redTruck = {
 	v :'7'
 };
 
+let cab = {
+	COMPLAINTDETAILS : 'Car stopped in bike lane',
+	COMPLAINTTYPE : 'For Hire Vehicle Complaint',
+	CONTACTANONFLAG : 'Y',
+	CONTACTDAYTIMEPHONE:'6166666561',
+	CONTACTFIRSTNAME:'Matt',
+	CONTACTLASTNAME:'Kime',
+	CONTACTEMAILADDRESS:'matt@mattki.me',
+	DESCRIPTOR1 : 'Driver Complaint',
+	DESCRIPTOR2 : 'Unsafe Driving',
+	FORM : 'TLC FHV Complaint',
+	INCIDENTADDRESSNUMBER : '',
+	INCIDENTBOROUGH: 'Brooklyn',
+	INCIDENTCITY: '',
+	INCIDENTDATETIME: '02/01/2017 09:12:00',
+	INCIDENTSTATE : '',
+	INCIDENTONSTREET1NAME : 'Bedford Ave',
+	INCIDENTONSTREETNAME : 'Willoughby Ave',
+	INCIDENTZIP: '11205',
+	MSGSOURCE : '311 Mobile - iPhone',
+	VEHICLETYPE : 'Car Service',
+	cellPhoneUsage : 'No',
+	licensePlate : 'T479908C',
+	topic : 'Taxi Driver',
+	userId, //:'60323A92-90A8-4035-9D4E-480CA05198A9',
+	v :'7',
+	media1: require('fs').createReadStream('/Volumes/NO_NAME\ \ \ \ /DCIM/173_VIRB/VIRB0009.JPG')
+}
+
+
+
+
+
 let formDataToConfig = formDataObj => {
 	return {
 		method: 'post',
@@ -98,8 +131,32 @@ let formDataToConfig = formDataObj => {
 	};
 }
 
+let config = {
+	host: 'www1.nyc.gov',
+	path: '/NYC311-Mobile-Services-A/SRcreate.htm',
+	//protocol: 'https:',
+	method: 'post'
+}
+
+/*
+submitComplaint$ = (data){
+	return Rx.
+*/
+
+objToFormData(cab).submit(config, (err, res) => {
+	if(err){
+		console.log('error');
+		console.log(err);
+	}else{
+		let body = '';
+		res.on('data', chunk => body += chunk);
+		res.on('end', () => console.log(body));
+	}})
+
+/*
 console.log( formDataToConfig(redTruck));
-fetch$('SRcreate.htm', formDataToConfig(redTruck))
+fetch$('SRcreate.htm', formDataToConfig(cab))
 	.do(console.log)
 	.flatMap(res=> Rx.Observable.fromPromise(res.text()))
 	.subscribe(console.log);
+	*/
