@@ -10,7 +10,6 @@ let { post$ } = require('./lib/mobile-post');
 let photo_prompt = {
 	'name':'photo',
 	'message':'photo',
-	//'filter': str => require('fs').createReadStream(str.replace(/\\ /g," ").trim())
 	'filter': str => str.replace(/\\ /g," ").trim()
 };
 
@@ -138,12 +137,12 @@ let formatComplaint = data => {
 Rx.Observable.fromPromise(
 	inquirer.prompt([ photo_prompt, borough_prompt, plate_prompt, complaint_prompt ])
 )
-.flatMap( prompt_data => {
-	return exifRevGeocode$(prompt_data.photo)
-		.map( data => Object.assign(
-			formatComplaint(data),
-			{ media1 : require('fs').createReadStream(prompt_data.photo)}
-		));
-})
-.flatMap( post$ )
-.subscribe(null,null,() => console.log('done'));
+	.flatMap( prompt_data => {
+		return exifRevGeocode$(prompt_data.photo)
+			.map( data => Object.assign(
+				formatComplaint(data),
+				{ media1 : require('fs').createReadStream(prompt_data.photo)}
+			));
+	})
+	.flatMap( post$ )
+	.subscribe(null,null,() => console.log('done'));
