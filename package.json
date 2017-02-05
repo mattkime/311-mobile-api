@@ -14,6 +14,9 @@
   "license": "MIT",
   "dependencies": {
     "cookie": "^0.3.1",
+    "dateformat": "^2.0.0",
+    "dms2dec": "^1.1.0",
+    "exif": "^0.6.0",
     "form-data": "^2.1.2",
     "inquirer": "^3.0.1",
     "node-fetch": "^1.6.3",

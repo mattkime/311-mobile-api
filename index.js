@@ -1,11 +1,6 @@
-let cookie = require('cookie');
-let exec = require('child_process').exec;
-let fetch = require('node-fetch');
 let fs = require('fs');
-let FormData = require('form-data');
 let inquirer = require('inquirer');
-let Rx = require('rxjs');
-let uuid = require('uuid/v4');
+let { post$, lookup$ } = require('./lib/mobile-post');
 
 let userId = '54cc9827-b305-4960-b088-a44faebb051b';
 let redTruck = {
@@ -33,9 +28,36 @@ let redTruck = {
 	userId, //:'60323A92-90A8-4035-9D4E-480CA05198A9',
 	v :'7'
 };
+/*
+let car = {
+	COMPLAINTDETAILS : 'Car parked directly on flexpost intended to define parking limits. north end of grand army plaza east',
+	COMPLAINTTYPE : 'Illegal Parking',
+	CONTACTANONFLAG : 'Y',
+	CONTACTDAYTIMEPHONE:'6166666561',
+	CONTACTFIRSTNAME:'Matt',
+	CONTACTLASTNAME:'Kime',
+	CONTACTEMAILADDRESS:'matt@mattki.me',
+	DESCRIPTIONRECURRINGTIME : 'Yes',
+	DESCRIPTOR1 : 'Posted Parking Sign Violation',
+	FORM : 'NYPD Quality of Life',
+	INCIDENTADDRESSNUMBER : '',
+	INCIDENTONSTREET : 'Grand Army Plaza',
+	INCIDENTPLACENAME : 'Grand Army Plaza',
+	INCIDENTSPATIALXCOORD : '-73.969226',
+	INCIDENTSPATIALYCOORD : '40.674912',
+	INCIDENTSTATE : 'New York',
+	INCIDENTSTREETNAME : 'Grand Army Plaza',
+	LOCATIONDETAILS : 'Grand Army Plaza, Brooklyn, NY 11238, USA',
+	LOCATIONTYPE : 'Street/Sidewalk',
+	MSGSOURCE : '311 Mobile - iPhone',
+	topic :'Illegal Parking',
+	userId, //:'60323A92-90A8-4035-9D4E-480CA05198A9',
+	v :'7'
+};
+*/
 
 let cab = {
-	COMPLAINTDETAILS : 'Car stopped in bike lane',
+	COMPLAINTDETAILS : 'Car service stopped in bike lane / failure to pull to curb. available curb space - photo attached',
 	COMPLAINTTYPE : 'For Hire Vehicle Complaint',
 	CONTACTANONFLAG : 'Y',
 	CONTACTDAYTIMEPHONE:'6166666561',
@@ -48,54 +70,38 @@ let cab = {
 	INCIDENTADDRESSNUMBER : '',
 	INCIDENTBOROUGH: 'Brooklyn',
 	INCIDENTCITY: '',
-	INCIDENTDATETIME: '02/01/2017 09:12:00',
+	INCIDENTDATETIME: '01/30/2017 09:16:00',
 	INCIDENTSTATE : '',
 	INCIDENTONSTREET1NAME : 'Bedford Ave',
-	INCIDENTONSTREETNAME : 'Willoughby Ave',
+	INCIDENTONSTREETNAME : 'Dekalb Ave',
 	INCIDENTZIP: '11205',
 	MSGSOURCE : '311 Mobile - iPhone',
 	VEHICLETYPE : 'Car Service',
 	cellPhoneUsage : 'No',
-	licensePlate : 'T479908C',
+	licensePlate : 'T720102C',
 	topic : 'Taxi Driver',
 	userId, //:'60323A92-90A8-4035-9D4E-480CA05198A9',
 	v :'7',
-	media1: require('fs').createReadStream('/Volumes/NO_NAME\ \ \ \ /DCIM/173_VIRB/VIRB0009.JPG')
+	media1: require('fs').createReadStream('/Users/mattk/Desktop/Screen\ Shot\ 2017-02-03\ at\ 4.50.06\ PM.png')
 }
-
-var objToFormData = ( obj ) => {
-	let data = new FormData();
-
-	Object.keys( obj ).forEach( k => data.append( k, obj[k] ) );
-	return data;
-};
-
-let config = {
-	host: 'www1.nyc.gov',
-	path: '/NYC311-Mobile-Services-A/SRcreate.htm',
-	//protocol: 'https:',
-	method: 'post'
-}
-
-/*
-submitComplaint$ = (data){
-	return Rx.
-
-objToFormData(cab).submit(config, (err, res) => {
-	if(err){
-		console.log('error');
-		console.log(err);
-	}else{
-		let body = '';
-		res.on('data', chunk => body += chunk);
-		res.on('end', () => console.log(body));
-	}})
-*/
 
 
 //console.log( formDataToConfig(redTruck));
 //fetch$('SRcreate.htm', formDataToConfig(cab))
+/*
 fetch$('SRcreate.htm', formDataToConfig(redTruck))
 	.do(console.log)
 	.flatMap(res=> Rx.Observable.fromPromise(res.text()))
 	.subscribe(console.log);
+*/
+
+let lookup = {
+	trackingNumber:'4738FFF480CA688BE0540003BA35EB85',
+	userId, //:'60323A92-90A8-4035-9D4E-480CA05198A9',
+	v :'7'
+};
+post$(cab)
+//lookup$(lookup)
+	.do(console.log)
+//	.subscribe(console.log, console.log, () => console.log('DONE'));
+
