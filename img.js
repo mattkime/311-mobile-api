@@ -1,11 +1,13 @@
 let config = require('./config');
-let dateFormat = require('dateformat');
-let dms2dec = require('dms2dec');
-let ExifImage = require('exif').ExifImage;
-let FormData = require('form-data');
 let inquirer = require('inquirer');
 let Rx = require('rxjs');
-let { post$ } = require('./lib/mobile-post');
+let { post$, exifRevGeocode$ } = require('./lib/mobile-post');
+
+let photo_exif_prompt = {
+	'name':'photo',
+	'message':'photo exif',
+	'filter': str => str.replace(/\\ /g," ").trim()
+};
 
 let photo_prompt = {
 	'name':'photo',
@@ -29,78 +31,6 @@ let complaint_prompt = {
 	'filter': str => str.trim() + ' - photo attached'
 };
 
-let ExifImage$ = image => Rx.Observable.create( ob => {
-	new ExifImage({ image }, (err, exif) => {
-		if(err){
-			console.log(err.code);
-		}
-		ob.next( err ? {} : exif)
-		ob.complete();
-	});
-});
-
-let formatExif = exif => ({
-	time : exif.image.ModifyDate,
-	latLong : dms2dec(exif.gps.GPSLatitude,exif.gps.GPSLatitudeRef,exif.gps.GPSLongitude,exif.gps.GPSLongitudeRef),
-});
-let streamToString = stream =>
-	Rx.Observable.create( ob => {
-		let body = '';
-		stream.on('error', ob.error);
-		stream.on('data', chunk => body += chunk );
-		stream.on('end', () => {
-			ob.next(body);
-			ob.complete();
-		});
-	});
-let objToFormData = ( obj ) => {
-	let data = new FormData();
-
-	Object.keys( obj ).forEach( k => data.append( k, obj[k] ) );
-	return data;
-};
-
-
-let revGeocode$ = function({latLong: [ lat, long]}){
-	let formData = {
-		location : `{ y : ${lat}, x : ${long} }`,
-		distance : 150,
-		returnIntersection : 'true',
-		f : 'json',
-	};
-	let formDataObj = objToFormData( formData);
-	let config = {
-		host: 'geocode.arcgis.com',
-		path: '/arcgis/rest/services/World/GeocodeServer/reverseGeocode',
-		method: 'post'
-	};
-
-	return Rx.Observable.bindNodeCallback(formDataObj.submit.bind(formDataObj))(config)
-		.flatMap(streamToString)
-		.map(JSON.parse)
-		.do(console.log)
-};
-
-let exifRevGeocode$ = path => ExifImage$(path)
-	.flatMap( exifInfo => {
-		let datetime = modifyDate(exifInfo.exif.CreateDate);
-		return Rx.Observable.if(
-		() => !!exifInfo.gps,
-		Rx.Observable.of(exifInfo)
-			.map( formatExif )
-			.flatMap( revGeocode$ )
-			.map( addressInfo => Object.assign(addressInfo,{datetime})),
-		Rx.Observable.of({ datetime })
-	)});
-
-var modifyDate = function(dateAsStr){
-	console.log('dateAsStr', dateAsStr );
-	let [ imgDate, imgTime] = dateAsStr.split(" ")
-	let [ imgYear, imgMonth, imgDay ] = imgDate.split(":");
-	let [ imgHour, imgMinute, imgSecond ] = imgTime.split(":");
-	return dateFormat(new Date(imgYear, imgMonth - 1, imgDay, imgHour, imgMinute, imgSecond), "mm/dd/yyyy HH:MM:ss" )
-}
-
 let formatComplaint = data => {
 	let complaint = {
 		COMPLAINTTYPE : 'For Hire Vehicle Complaint',
@@ -121,13 +51,17 @@ let formatComplaint = data => {
 
 	let incident = {
 		INCIDENTDATETIME : data.datetime,
-		INCIDENTONSTREET1NAME : str1,
+		INCIDENTSTREET1NAME : str1,
 		INCIDENTONSTREETNAME : str2,
+		INCIDENTSTREETNAME : str2,
+		LOCATIONDETAILS: data.address.Address + ', ' + data.promptData.INCIDENTBOROUGH,
 		INCIDENTZIP: data.address.Postal,
+		INCIDENTSPATIALXCOORD: data.location.x,
+		INCIDENTSPATIALYCOORD: data.location.y,
 		//
-		INCIDENTBOROUGH : 'Manhattan',
-		COMPLAINTDETAILS: 'Car service stopped in the bike lane - photo atached',
-		licensePlate : 'T720102C',
+		INCIDENTBOROUGH : data.promptData.INCIDENTBOROUGH,
+		COMPLAINTDETAILS: data.promptData.COMPLAINTDETAILS,
+		licensePlate : data.promptData.licensePlate,
 	};
 
 	Object.assign(complaint, basics, config.contact_info, incident);
@@ -138,11 +72,12 @@ Rx.Observable.fromPromise(
 	inquirer.prompt([ photo_prompt, borough_prompt, plate_prompt, complaint_prompt ])
 )
 	.flatMap( prompt_data => {
-		return exifRevGeocode$(prompt_data.photo)
+		return exifRevGeocode$(prompt_data)
 			.map( data => Object.assign(
 				formatComplaint(data),
 				{ media1 : require('fs').createReadStream(prompt_data.photo)}
 			));
 	})
-	.flatMap( post$ )
+	//.flatMap( post$ )
+	.do(console.log)
 	.subscribe(null,null,() => console.log('done'));

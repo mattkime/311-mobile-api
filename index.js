@@ -4,7 +4,7 @@ let { post$, lookup$ } = require('./lib/mobile-post');
 
 let userId = '54cc9827-b305-4960-b088-a44faebb051b';
 let redTruck = {
-	COMPLAINTDETAILS : 'Red pickup truck parked on mulberry st in front of rei',
+	COMPLAINTDETAILS : 'Red truck parked on mulberry st in front of rei',
 	COMPLAINTTYPE : 'Illegal Parking',
 	CONTACTANONFLAG : 'Y',
 	CONTACTDAYTIMEPHONE:'6166666561',
@@ -70,7 +70,7 @@ let cab = {
 	INCIDENTADDRESSNUMBER : '',
 	INCIDENTBOROUGH: 'Brooklyn',
 	INCIDENTCITY: '',
-	INCIDENTDATETIME: '01/30/2017 09:16:00',
+	INCIDENTDATETIME: '02/14/2017 10:06:00',
 	INCIDENTSTATE : '',
 	INCIDENTONSTREET1NAME : 'Bedford Ave',
 	INCIDENTONSTREETNAME : 'Dekalb Ave',
@@ -100,8 +100,8 @@ let lookup = {
 	userId, //:'60323A92-90A8-4035-9D4E-480CA05198A9',
 	v :'7'
 };
-post$(cab)
-//lookup$(lookup)
+post$(redTruck)
+//lookup$(lookup.trackingNumber)
 	.do(console.log)
-//	.subscribe(console.log, console.log, () => console.log('DONE'));
+	.subscribe(console.log, console.log, () => console.log('DONE'));
 
